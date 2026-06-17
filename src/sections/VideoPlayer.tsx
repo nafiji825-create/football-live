@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { Play, PictureInPicture, Maximize, Loader2, AlertCircle, Volume2, VolumeX, Pause } from 'lucide-react';
+import { Play, PictureInPicture, Maximize, Loader2, AlertCircle, Volume2, VolumeX, Pause, Link2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { channels } from '@/data';
 
 interface VideoPlayerProps {
   selectedChannel: string | null;
+  /** A custom stream URL the user pasted themselves (overrides channel). */
+  customStream?: string | null;
 }
 
 type Status = 'idle' | 'loading' | 'playing' | 'error';
 
-export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
+export default function VideoPlayer({ selectedChannel, customStream }: VideoPlayerProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [isMuted, setIsMuted] = useState(true);
@@ -101,12 +103,13 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
     }
   }, []);
 
-  // React to channel selection
+  // React to channel selection OR custom stream
   useEffect(() => {
-    if (channel?.streamUrl) {
-      loadStream(channel.streamUrl, channel.fallbackUrls ?? []);
+    const streamUrl = customStream || channel?.streamUrl;
+    if (streamUrl) {
+      loadStream(streamUrl, channel?.fallbackUrls ?? []);
     } else {
-      // No channel selected — stop & clean up
+      // No stream selected — stop & clean up
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -125,7 +128,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel?.id]);
+  }, [channel?.id, customStream]);
 
   // Mark status playing once the video actually plays
   useEffect(() => {
@@ -145,7 +148,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
       video.removeEventListener('pause', onPause);
       video.removeEventListener('waiting', onWaiting);
     };
-  }, [channel?.id]);
+  }, [channel?.id, customStream]);
 
   // Track fullscreen state
   useEffect(() => {
@@ -223,7 +226,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
           autoPlay
           playsInline
           muted={isMuted}
-          poster={channel?.poster}
+          poster={customStream ? undefined : channel?.poster}
         />
 
         {/* IDLE / SELECT CHANNEL overlay */}
@@ -237,12 +240,18 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
               <span className="w-2 h-2 bg-[#00E676] rounded-full animate-pulse" />
               <span className="text-[#00E676] font-semibold text-sm">Live</span>
             </motion.div>
-            {channel ? (
+            {customStream ? (
+              <p className="text-[#64748B] text-sm text-center">
+                Custom stream ready — tap play
+              </p>
+            ) : channel ? (
               <p className="text-[#64748B] text-sm text-center">
                 Ready: <span className="text-white font-medium">{channel.name}</span>
               </p>
             ) : (
-              <p className="text-[#64748B] text-sm">Select a channel to begin</p>
+              <p className="text-[#64748B] text-sm text-center">
+                Paste a stream URL below or pick a channel
+              </p>
             )}
           </div>
         )}
@@ -260,9 +269,9 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-4">
             <AlertCircle className="w-8 h-8 text-red-400" />
             <p className="text-red-300 text-sm text-center">{errorMsg}</p>
-            {channel?.streamUrl && (
+            {(customStream || channel?.streamUrl) && (
               <button
-                onClick={() => loadStream(channel.streamUrl!, channel.fallbackUrls ?? [])}
+                onClick={() => loadStream((customStream || channel?.streamUrl)!, channel?.fallbackUrls ?? [])}
                 className="mt-1 px-4 py-1.5 rounded-full bg-[#00E676]/20 border border-[#00E676] text-[#00E676] text-xs font-medium"
               >
                 Retry
@@ -345,6 +354,16 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
           </div>
         )}
       </div>
+
+      {/* Now Playing label */}
+      {(customStream || channel) && (
+        <div className="flex items-center justify-center gap-2 text-[#64748B] text-xs">
+          <Link2 className="w-3 h-3" />
+          <span className="truncate max-w-[280px]">
+            {customStream ? 'Custom stream' : channel?.name}
+          </span>
+        </div>
+      )}
 
       {/* External Control Buttons */}
       <div className="flex items-center gap-3 justify-center">
