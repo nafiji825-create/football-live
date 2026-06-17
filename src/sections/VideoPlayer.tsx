@@ -1,18 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { Play, PictureInPicture, Maximize, Loader2, AlertCircle, Volume2, VolumeX, Pause, Link2 } from 'lucide-react';
+import { Play, PictureInPicture, Maximize, Loader2, AlertCircle, Volume2, VolumeX, Pause } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { channels } from '@/data';
 
 interface VideoPlayerProps {
   selectedChannel: string | null;
-  /** A custom stream URL the user pasted themselves (overrides channel). */
-  customStream?: string | null;
 }
 
 type Status = 'idle' | 'loading' | 'playing' | 'error';
 
-export default function VideoPlayer({ selectedChannel, customStream }: VideoPlayerProps) {
+export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [isMuted, setIsMuted] = useState(true);
@@ -89,7 +87,7 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
                 setTimeout(() => loadStream(next, rest), 600);
               } else {
                 setStatus('error');
-                setErrorMsg('This stream is currently offline. Try another channel.');
+                setErrorMsg('This stream is currently offline or region-blocked. Try another channel.');
               }
               break;
           }
@@ -103,9 +101,9 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
     }
   }, []);
 
-  // React to channel selection OR custom stream
+  // React to channel selection
   useEffect(() => {
-    const streamUrl = customStream || channel?.streamUrl;
+    const streamUrl = channel?.streamUrl;
     if (streamUrl) {
       loadStream(streamUrl, channel?.fallbackUrls ?? []);
     } else {
@@ -128,7 +126,7 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channel?.id, customStream]);
+  }, [channel?.id]);
 
   // Mark status playing once the video actually plays
   useEffect(() => {
@@ -148,7 +146,7 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
       video.removeEventListener('pause', onPause);
       video.removeEventListener('waiting', onWaiting);
     };
-  }, [channel?.id, customStream]);
+  }, [channel?.id]);
 
   // Track fullscreen state
   useEffect(() => {
@@ -217,7 +215,8 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
       {/* Video Container */}
       <div
         ref={containerRef}
-        className="relative w-full aspect-video bg-[#0B0E13] rounded-2xl overflow-hidden border border-[#2A3142]"
+        className="relative w-full aspect-video rounded-2xl overflow-hidden border shadow-card"
+        style={{ backgroundColor: '#000', borderColor: 'var(--border)' }}
       >
         {/* The video element is always mounted so refs stay stable */}
         <video
@@ -226,7 +225,7 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
           autoPlay
           playsInline
           muted={isMuted}
-          poster={customStream ? undefined : channel?.poster}
+          poster={channel?.poster}
         />
 
         {/* IDLE / SELECT CHANNEL overlay */}
@@ -235,22 +234,24 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#00E676]/20 rounded-full"
+              className="flex items-center gap-2 px-4 py-2 rounded-full"
+              style={{ backgroundColor: 'var(--accent-soft)' }}
             >
-              <span className="w-2 h-2 bg-[#00E676] rounded-full animate-pulse" />
-              <span className="text-[#00E676] font-semibold text-sm">Live</span>
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ backgroundColor: 'var(--accent)' }}
+              />
+              <span className="font-semibold text-sm" style={{ color: 'var(--accent)' }}>
+                Live
+              </span>
             </motion.div>
-            {customStream ? (
-              <p className="text-[#64748B] text-sm text-center">
-                Custom stream ready — tap play
-              </p>
-            ) : channel ? (
-              <p className="text-[#64748B] text-sm text-center">
-                Ready: <span className="text-white font-medium">{channel.name}</span>
+            {channel ? (
+              <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+                Ready: <span style={{ color: 'var(--text)' }} className="font-medium">{channel.name}</span>
               </p>
             ) : (
-              <p className="text-[#64748B] text-sm text-center">
-                Paste a stream URL below or pick a channel
+              <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+                Pick a channel below to start watching
               </p>
             )}
           </div>
@@ -259,8 +260,8 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
         {/* LOADING overlay */}
         {status === 'loading' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40">
-            <Loader2 className="w-8 h-8 text-[#00E676] animate-spin" />
-            <p className="text-[#94A3B8] text-xs">Loading stream…</p>
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
+            <p className="text-white text-xs">Loading stream…</p>
           </div>
         )}
 
@@ -269,10 +270,15 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 px-4">
             <AlertCircle className="w-8 h-8 text-red-400" />
             <p className="text-red-300 text-sm text-center">{errorMsg}</p>
-            {(customStream || channel?.streamUrl) && (
+            {channel?.streamUrl && (
               <button
-                onClick={() => loadStream((customStream || channel?.streamUrl)!, channel?.fallbackUrls ?? [])}
-                className="mt-1 px-4 py-1.5 rounded-full bg-[#00E676]/20 border border-[#00E676] text-[#00E676] text-xs font-medium"
+                onClick={() => loadStream(channel.streamUrl!, channel?.fallbackUrls ?? [])}
+                className="mt-1 px-4 py-1.5 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: 'var(--accent-soft)',
+                  border: '1px solid var(--accent)',
+                  color: 'var(--accent)',
+                }}
               >
                 Retry
               </button>
@@ -283,8 +289,8 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
         {/* Top-left LIVE badge while playing */}
         {status === 'playing' && (
           <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur rounded-full">
-            <span className="w-1.5 h-1.5 bg-[#00E676] rounded-full animate-pulse" />
-            <span className="text-[#00E676] font-semibold text-[11px]">LIVE</span>
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+            <span className="text-emerald-400 font-semibold text-[11px]">LIVE</span>
           </div>
         )}
 
@@ -313,8 +319,8 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
                 onClick={() => setQuality(-1)}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                   selectedLevel === -1
-                    ? 'bg-[#2196F3] text-white'
-                    : 'bg-[#1E2330] text-[#94A3B8] border border-[#2A3142] hover:border-[#64748B]'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-black/40 text-slate-300 border border-white/15 hover:border-white/40'
                 }`}
               >
                 Auto
@@ -325,27 +331,18 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
                   onClick={() => setQuality(l.index)}
                   className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                     selectedLevel === l.index
-                      ? 'bg-[#2196F3] text-white'
-                      : 'bg-[#1E2330] text-[#94A3B8] border border-[#2A3142] hover:border-[#64748B]'
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-black/40 text-slate-300 border border-white/15 hover:border-white/40'
                   }`}
                 >
                   {l.height}p
                 </button>
               ))}
-              {levels.length === 0 && (
-                <>
-                  {['1080', '720', '540'].map((q) => (
-                    <span key={q} className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#1E2330] text-[#64748B] border border-[#2A3142]">
-                      {q}p
-                    </span>
-                  ))}
-                </>
-              )}
             </div>
             <div className="flex items-center gap-2 justify-center">
               <button
                 onClick={toggleMute}
-                className="p-2 rounded-full bg-[#1E2330] border border-[#2A3142] text-[#94A3B8] hover:text-white transition-colors"
+                className="p-2 rounded-full bg-black/40 border border-white/15 text-slate-300 hover:text-white transition-colors"
                 aria-label="Mute / Unmute"
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -356,11 +353,10 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
       </div>
 
       {/* Now Playing label */}
-      {(customStream || channel) && (
-        <div className="flex items-center justify-center gap-2 text-[#64748B] text-xs">
-          <Link2 className="w-3 h-3" />
-          <span className="truncate max-w-[280px]">
-            {customStream ? 'Custom stream' : channel?.name}
+      {channel && (
+        <div className="flex items-center justify-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <span className="truncate max-w-[280px] font-medium" style={{ color: 'var(--text)' }}>
+            {channel.name}
           </span>
         </div>
       )}
@@ -370,7 +366,12 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
         <button
           onClick={togglePiP}
           disabled={status !== 'playing'}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1E2330] border border-[#2A3142] text-[#94A3B8] hover:text-white hover:border-[#64748B] transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: 'var(--surface)',
+            borderColor: 'var(--border)',
+            color: 'var(--text-muted)',
+          }}
         >
           <PictureInPicture className="w-4 h-4" />
           PiP
@@ -378,7 +379,12 @@ export default function VideoPlayer({ selectedChannel, customStream }: VideoPlay
         <button
           onClick={toggleFullscreen}
           disabled={status !== 'playing'}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1E2330] border border-[#2A3142] text-[#94A3B8] hover:text-white hover:border-[#64748B] transition-all text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: 'var(--surface)',
+            borderColor: 'var(--border)',
+            color: 'var(--text-muted)',
+          }}
         >
           <Maximize className="w-4 h-4" />
           {isFullscreen ? 'Exit' : 'Fullscreen'}

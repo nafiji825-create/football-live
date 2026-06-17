@@ -2,90 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   THEME TOKENS
+   A small set of semantic variables that swap cleanly between
+   dark and light. Components reference these via var(--xxx)
+   so every surface, border, and text element flips correctly
+   in both modes — no fragile attribute-override hacks.
+   ============================================================ */
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.625rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  :root,
+  [data-theme='dark'] {
+    --bg: #0B0E13;
+    --surface: #141925;
+    --surface-2: #1B2230;
+    --border: #232B3D;
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --accent: #10B981;
+    --accent-soft: rgba(16, 185, 129, 0.14);
+    --live: #EF4444;
+    --live-soft: rgba(239, 68, 68, 0.14);
+    --gold: #F59E0B;
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  [data-theme='light'] {
+    --bg: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8FAFC;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-muted: #64748B;
+    --accent: #059669;
+    --accent-soft: rgba(5, 150, 105, 0.12);
+    --live: #DC2626;
+    --live-soft: rgba(220, 38, 38, 0.10);
+    --gold: #D97706;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--bg);
+    color: var(--text);
   }
 }
 
-/* Marquee Animation */
+/* Marquee Animation (header ticker) */
 @keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
-
 .animate-marquee {
-  animation: marquee 20s linear infinite;
+  animation: marquee 28s linear infinite;
 }
 
 /* Hide Scrollbar */
@@ -97,32 +65,7 @@
   display: none;
 }
 
-/* ============================================================
-   LIGHT THEME
-   The app is built with hard-coded dark Tailwind colors
-   (bg-[#0B0E13], text-white, etc.). When the user toggles to
-   light mode we flip the most common ones via attribute CSS
-   overrides so the whole UI re-themes without rewriting every
-   component.
-   ============================================================ */
-.flive-light {
-  background-color: #F1F5F9;
+/* Subtle premium card shadow */
+.shadow-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.10);
 }
-
-/* Surface backgrounds (cards, inputs, buttons) */
-.flive-light [class*="bg-[#0B0E13]"] { background-color: #F1F5F9 !important; }
-.flive-light [class*="bg-[#161A22]"] { background-color: #FFFFFF !important; }
-.flive-light [class*="bg-[#1E2330]"] { background-color: #E2E8F0 !important; }
-.flive-light [class*="bg-[#1E2330]\/90"] { background-color: rgba(226, 232, 240, 0.9) !important; }
-
-/* Borders */
-.flive-light [class*="border-[#2A3142]"] { border-color: #CBD5E1 !important; }
-
-/* Text — main */
-.flive-light .text-white { color: #0F172A !important; }
-/* Text — muted */
-.flive-light .text-\[\#94A3B8\] { color: #475569 !important; }
-.flive-light .text-\[\#64748B\] { color: #64748B !important; }
-
-/* Placeholders */
-.flive-light input::placeholder { color: #94A3B8 !important; }
