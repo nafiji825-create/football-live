@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e14" />
+  <meta name="description" content="Football Live — today's matches, live scores and match details." />
+
+  <title>Football Live</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/12c46a/0a0e14?text=FL" />
+
+  <!-- Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== Top Bar ===== -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="logo-dot"></span>
+      <h1>Football<span>Live</span></h1>
+    </div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">◐</button>
+  </header>
+
+  <!-- ===== Ad Banner (top) ===== -->
+  <div class="ad-banner" data-ad="top">
+    <span>Ad Banner · 320×50</span>
+  </div>
+
+  <main class="app">
+
+    <!-- ===== HOME VIEW ===== -->
+    <section class="view view--active" id="view-home">
+
+      <!-- Hero / Featured match with countdown -->
+      <div class="hero">
+        <span class="hero__tag">FEATURED · UEFA</span>
+        <div class="hero__teams">
+          <div class="team">
+            <img class="team__logo" src="https://placehold.co/64x64/1a2230/12c46a?text=MCI" alt="Man City" />
+            <span class="team__name">Man City</span>
+          </div>
+          <div class="hero__vs">
+            <span class="hero__score-live" data-live>VS</span>
+            <span class="hero__time">21:00</span>
+          </div>
+          <div class="team">
+            <img class="team__logo" src="https://placehold.co/64x64/1a2230/12c46a?text=RMA" alt="Real Madrid" />
+            <span class="team__name">Real Madrid</span>
+          </div>
+        </div>
+
+        <!-- Countdown timer -->
+        <div class="countdown" id="countdown" data-kickoff="">
+          <div class="countdown__box"><b id="cd-d">00</b><small>Days</small></div>
+          <div class="countdown__box"><b id="cd-h">00</b><small>Hrs</small></div>
+          <div class="countdown__box"><b id="cd-m">00</b><small>Min</small></div>
+          <div class="countdown__box"><b id="cd-s">00</b><small>Sec</small></div>
+        </div>
+      </div>
+
+      <!-- Today's Matches -->
+      <div class="section-head">
+        <h2>Today's Matches</h2>
+        <span class="date-pill" id="todayDate">Today</span>
+      </div>
+
+      <div class="match-list" id="matchList">
+        <!-- Match cards injected by script.js -->
+      </div>
+
+      <!-- Inline ad -->
+      <div class="ad-banner" data-ad="inline">
+        <span>Ad Banner · 300×100</span>
+      </div>
+    </section>
+
+    <!-- ===== MATCH DETAILS VIEW (template) ===== -->
+    <section class="view" id="view-match">
+      <button class="back-btn" id="backBtn">← Back</button>
+
+      <div class="match-detail">
+        <span class="match-detail__league" id="md-league">Premier League</span>
+
+        <div class="match-detail__head">
+          <div class="team team--lg">
+            <img class="team__logo" id="md-home-logo" src="" alt="" />
+            <span class="team__name" id="md-home-name"></span>
+          </div>
+
+          <div class="match-detail__score">
+            <span class="status-chip" id="md-status">LIVE</span>
+            <div class="big-score">
+              <span id="md-home-score">0</span>
+              <em>:</em>
+              <span id="md-away-score">0</span>
+            </div>
+            <span class="match-detail__time" id="md-time"></span>
+          </div>
+
+          <div class="team team--lg">
+            <img class="team__logo" id="md-away-logo" src="" alt="" />
+            <span class="team__name" id="md-away-name"></span>
+          </div>
+        </div>
+
+        <!-- Live score placeholder -->
+        <div class="live-box" id="md-live">
+          <span class="pulse"></span> Live score updates will appear here.
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab tab--active" data-tab="info">Info</button>
+        <button class="tab" data-tab="lineups">Lineups</button>
+        <button class="tab" data-tab="stats">Stats</button>
+      </div>
+
+      <div class="tab-panel" id="tab-info">
+        <ul class="info-list">
+          <li><span>🏟️ Venue</span><b id="md-venue">—</b></li>
+          <li><span>📅 Date</span><b id="md-date">—</b></li>
+          <li><span>🕒 Kickoff</span><b id="md-kickoff">—</b></li>
+          <li><span>🏆 Competition</span><b id="md-comp">—</b></li>
+        </ul>
+      </div>
+      <div class="tab-panel" id="tab-lineups" hidden>
+        <p class="muted">Lineups will be added when available.</p>
+      </div>
+      <div class="tab-panel" id="tab-stats" hidden>
+        <p class="muted">Match statistics will be added when available.</p>
+      </div>
+
+      <div class="ad-banner" data-ad="detail">
+        <span>Ad Banner · 300×250</span>
+      </div>
+    </section>
+
+    <!-- ===== LIVE VIEW ===== -->
+    <section class="view" id="view-live">
+      <div class="section-head"><h2>Live Now</h2><span class="date-pill pulse-pill">● LIVE</span></div>
+      <div class="match-list" id="liveList"></div>
+    </section>
+
+    <!-- ===== FAVORITES VIEW ===== -->
+    <section class="view" id="view-fav">
+      <div class="section-head"><h2>Favorites</h2></div>
+      <p class="muted" style="padding:24px 4px;">Tap the ★ on any match to save it here.</p>
+      <div class="match-list" id="favList"></div>
+    </section>
+
+  </main>
+
+  <!-- ===== Bottom Mobile Navigation ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-item nav-item--active" data-view="home">
+      <span class="nav-ico">🏠</span><small>Home</small>
+    </button>
+    <button class="nav-item" data-view="live">
+      <span class="nav-ico">📡</span><small>Live</small>
+    </button>
+    <button class="nav-item" data-view="fav">
+      <span class="nav-ico">★</span><small>Favorites</small>
+    </button>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>
