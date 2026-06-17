@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { Trophy, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/hooks/useTheme';
-import { useWorldCup } from '@/hooks/useWorldCup';
+import type { WcMatch } from '@/lib/worldcup';
 
-export default function AppHeader() {
+interface AppHeaderProps {
+  matches: WcMatch[];
+}
+
+export default function AppHeader({ matches }: AppHeaderProps) {
   const { theme, toggleTheme } = useTheme();
-  const { matches } = useWorldCup();
   const [hidden, setHidden] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -24,11 +27,9 @@ export default function AppHeader() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Live + upcoming fixtures feed the header ticker (real data).
   const ticker = matches
     .filter((m) => m.status === 'live' || m.status === 'upcoming')
     .slice(0, 8);
-  const tickerItems = ticker.length > 0 ? ticker : [];
 
   return (
     <motion.header
@@ -56,17 +57,17 @@ export default function AppHeader() {
           </span>
         </div>
 
-        {/* Ticker */}
+        {/* Ticker — uses real flag images */}
         <div className="flex-1 mx-3 overflow-hidden">
-          {tickerItems.length > 0 ? (
+          {ticker.length > 0 ? (
             <div className="flex animate-marquee whitespace-nowrap">
-              {[...tickerItems, ...tickerItems].map((m, i) => (
+              {[...ticker, ...ticker].map((m, i) => (
                 <span
                   key={i}
                   className="inline-flex items-center gap-1.5 mx-4 text-[13px] font-semibold"
                   style={{ color: 'var(--text-muted)' }}
                 >
-                  <span>{m.homeFlag}</span>
+                  <img src={m.homeFlagImg} alt="" className="w-5 h-3.5 object-cover rounded-sm" />
                   <span style={{ color: 'var(--text)' }}>{m.home}</span>
                   {m.status === 'live' ? (
                     <span style={{ color: 'var(--live)' }} className="font-bold">
@@ -76,7 +77,7 @@ export default function AppHeader() {
                     <span style={{ color: 'var(--text-muted)' }}>vs</span>
                   )}
                   <span style={{ color: 'var(--text)' }}>{m.away}</span>
-                  <span>{m.awayFlag}</span>
+                  <img src={m.awayFlagImg} alt="" className="w-5 h-3.5 object-cover rounded-sm" />
                   {m.status === 'live' && (
                     <span
                       className="text-[10px] font-bold px-1.5 py-0.5 rounded"
@@ -95,7 +96,7 @@ export default function AppHeader() {
           )}
         </div>
 
-        {/* Dark / Light mode toggle */}
+        {/* Dark / Light toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full border transition-colors shrink-0"

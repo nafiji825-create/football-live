@@ -1,3 +1,5 @@
+export type Tab = 'home' | 'fixtures';
+
 export interface Channel {
   id: string;
   name: string;

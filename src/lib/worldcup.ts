@@ -17,6 +17,8 @@ export interface WcMatch {
   away: string;
   homeFlag: string;
   awayFlag: string;
+  homeFlagImg: string;   // real PNG flag URL from flagcdn.com
+  awayFlagImg: string;
   date: string;     // YYYY-MM-DD (UTC)
   time: string;     // HH:MM (UTC)
   homeScore: number | null;
@@ -94,6 +96,8 @@ function normalize(raw: RawEvent): WcMatch {
     away: raw.strAwayTeam,
     homeFlag: flagForTeamLocal(raw.strHomeTeam),
     awayFlag: flagForTeamLocal(raw.strAwayTeam),
+    homeFlagImg: flagImgUrlLocal(raw.strHomeTeam),
+    awayFlagImg: flagImgUrlLocal(raw.strAwayTeam),
     date: raw.dateEvent,
     time,
     homeScore: raw.intHomeScore !== null ? Number(raw.intHomeScore) : null,
@@ -106,10 +110,13 @@ function normalize(raw: RawEvent): WcMatch {
   };
 }
 
-// local import to avoid circular issues
-import { flagForTeam } from './flags';
+// local imports to avoid circular issues
+import { flagForTeam, flagImgUrl } from './flags';
 function flagForTeamLocal(team: string): string {
   return flagForTeam(team);
+}
+function flagImgUrlLocal(team: string): string {
+  return flagImgUrl(team);
 }
 
 /** Fetch all FIFA World Cup matches for a single day. */
