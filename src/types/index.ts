@@ -2,16 +2,21 @@ export interface Match {
   id: string;
   homeTeam: string;
   homeAbbr: string;
+  homeFlag: string;
   awayTeam: string;
   awayAbbr: string;
+  awayFlag: string;
   league: string;
-  date: string;
-  time: string;
+  leagueLogo?: string;
+  date: string;   // UTC date "2026-06-20"
+  time: string;   // UTC time "21:00"
   status: 'upcoming' | 'live' | 'finished';
   homeScore?: number;
   awayScore?: number;
   minute?: number;
   isFeatured?: boolean;
+  /** Channel IDs assigned to this match */
+  channelIds: string[];
 }
 
 export interface Channel {
@@ -31,6 +36,7 @@ export interface Channel {
 
 export interface Fixture {
   matchday: string;
+  label?: string;
   matches: {
     home: string;
     homeFlag: string;
@@ -38,6 +44,9 @@ export interface Fixture {
     awayFlag: string;
     time: string;
     status: string;
+    homeScore?: number;
+    awayScore?: number;
+    minute?: number;
   }[];
 }
 

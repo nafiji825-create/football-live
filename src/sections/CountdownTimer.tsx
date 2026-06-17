@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { parseMatchUTC } from '@/lib/timezone';
 
 interface CountdownTimerProps {
   targetDate: string;
@@ -14,7 +15,8 @@ interface TimeLeft {
 }
 
 function getTimeLeft(targetDate: string, targetTime: string): TimeLeft {
-  const target = new Date(`${targetDate}T${targetTime}:00`);
+  // Use parseMatchUTC so stored UTC time is correctly interpreted
+  const target = parseMatchUTC(targetDate, targetTime);
   const now = new Date();
   const diff = target.getTime() - now.getTime();
 
@@ -46,10 +48,10 @@ export default function CountdownTimer({ targetDate, targetTime }: CountdownTime
       <motion.div
         initial={{ scale: 0.8 }}
         animate={{ scale: 1 }}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-[#00E676]/20 rounded-full"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full border border-red-500/40"
       >
-        <span className="w-2 h-2 bg-[#00E676] rounded-full animate-pulse" />
-        <span className="text-[#00E676] font-bold text-sm">LIVE NOW</span>
+        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+        <span className="text-red-400 font-bold text-sm tracking-wider">● LIVE NOW</span>
       </motion.div>
     );
   }
@@ -65,12 +67,12 @@ export default function CountdownTimer({ targetDate, targetTime }: CountdownTime
     <div className="flex items-center gap-2">
       {units.map((unit) => (
         <div key={unit.label} className="flex flex-col items-center">
-          <div className="w-14 h-12 bg-[#161A22] rounded-lg flex items-center justify-center border border-[#2A3142]">
+          <div className="w-14 h-12 bg-[#1E2330] rounded-lg flex items-center justify-center border border-[#2A3142]">
             <span className="text-white font-bold text-lg font-mono tabular-nums">
               {String(unit.value).padStart(2, '0')}
             </span>
           </div>
-          <span className="text-[#94A3B8] text-[9px] font-medium mt-1">{unit.label}</span>
+          <span className="text-[#64748B] text-[9px] font-medium mt-1 tracking-wider">{unit.label}</span>
         </div>
       ))}
     </div>
