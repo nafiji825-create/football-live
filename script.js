@@ -230,3 +230,21 @@ if ("serviceWorker" in navigator) {
   const blob = URL.createObjectURL(new Blob([swCode], { type: "text/javascript" }));
   navigator.serviceWorker.register(blob).catch(() => {});
 }
+const searchInput = document.getElementById("searchInput");
+
+if(searchInput){
+  searchInput.addEventListener("input", e => {
+
+    const q = e.target.value.toLowerCase();
+
+    const filtered = MATCHES.filter(m =>
+      m.home.name.toLowerCase().includes(q) ||
+      m.away.name.toLowerCase().includes(q)
+    );
+
+    document.getElementById("matchList").innerHTML =
+      filtered.map(matchCard).join("");
+
+    bindCards();
+  });
+}
