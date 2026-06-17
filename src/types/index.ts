@@ -19,6 +19,7 @@ export interface Channel {
   name: string;
   category: string;
   logo: string;
+  logoUrl?: string;
   country?: string;
   countryFlag?: string;
   quality: string;

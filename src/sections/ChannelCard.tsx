@@ -25,8 +25,19 @@ export default function ChannelCard({ channel, isSelected, onSelect }: ChannelCa
       }`}
     >
       {/* Channel Logo */}
-      <div className="w-10 h-10 rounded-full bg-[#1E2330] border border-[#2A3142] flex items-center justify-center shrink-0">
-        <span className="text-[11px] font-bold text-[#94A3B8]">{channel.logo.slice(0, 4)}</span>
+      <div className="w-10 h-10 rounded-full bg-[#1E2330] border border-[#2A3142] flex items-center justify-center shrink-0 overflow-hidden">
+        {channel.logoUrl ? (
+          <img
+            src={channel.logoUrl}
+            alt={channel.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <span className="text-[11px] font-bold text-[#94A3B8]">{channel.logo.slice(0, 4)}</span>
+        )}
       </div>
 
       {/* Channel Info (clickable to play) */}
