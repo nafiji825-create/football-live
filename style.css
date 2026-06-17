@@ -185,3 +185,42 @@ body.light .bottom-nav { background:rgba(255,255,255,.92); }
 .skeleton { background:linear-gradient(90deg,var(--card) 25%,var(--card-2) 50%,var(--card) 75%);
   background-size:200% 100%; animation:shimmer 1.2s infinite; border-radius:var(--radius); height:78px; }
 @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+/* ===== Search ===== */
+.search-wrap{
+  margin:12px 0 16px;
+}
+
+.search-box{
+  width:100%;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--text);
+  font-size:14px;
+  outline:none;
+}
+
+.search-box:focus{
+  border-color:var(--brand);
+}
+
+/* ===== League Filter ===== */
+.league-filter{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:8px;
+  margin-bottom:14px;
+}
+
+.league-filter button{
+  white-space:nowrap;
+  border:none;
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 14px;
+  cursor:pointer;
+}
