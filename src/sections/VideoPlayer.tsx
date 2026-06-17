@@ -27,7 +27,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
   const channel = channels.find((c) => c.id === selectedChannel) ?? null;
 
   // ---------- Core: load & play the stream ----------
-  const loadStream = useCallback((url: string) => {
+  const loadStream = useCallback((url: string, fallbackList: string[] = []) => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -72,16 +72,23 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
+              // try recovery once, otherwise fall through to fallback
               hls.startLoad();
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
               break;
             default:
-              setStatus('error');
-              setErrorMsg('This stream could not be loaded.');
+              // Try the next fallback URL if any remain
               hls.destroy();
               hlsRef.current = null;
+              if (fallbackList.length > 0) {
+                const [next, ...rest] = fallbackList;
+                setTimeout(() => loadStream(next, rest), 600);
+              } else {
+                setStatus('error');
+                setErrorMsg('This stream is currently offline. Try another channel.');
+              }
               break;
           }
         }
@@ -97,7 +104,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
   // React to channel selection
   useEffect(() => {
     if (channel?.streamUrl) {
-      loadStream(channel.streamUrl);
+      loadStream(channel.streamUrl, channel.fallbackUrls ?? []);
     } else {
       // No channel selected — stop & clean up
       if (hlsRef.current) {
@@ -255,7 +262,7 @@ export default function VideoPlayer({ selectedChannel }: VideoPlayerProps) {
             <p className="text-red-300 text-sm text-center">{errorMsg}</p>
             {channel?.streamUrl && (
               <button
-                onClick={() => loadStream(channel.streamUrl!)}
+                onClick={() => loadStream(channel.streamUrl!, channel.fallbackUrls ?? [])}
                 className="mt-1 px-4 py-1.5 rounded-full bg-[#00E676]/20 border border-[#00E676] text-[#00E676] text-xs font-medium"
               >
                 Retry

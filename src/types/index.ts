@@ -24,6 +24,8 @@ export interface Channel {
   countryFlag?: string;
   quality: string;
   streamUrl?: string;
+  /** Backup stream URLs tried in order if the primary fails. */
+  fallbackUrls?: string[];
   poster?: string;
 }
 
